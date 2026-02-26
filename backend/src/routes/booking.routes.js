@@ -54,14 +54,14 @@ router.delete(
 // Grouped by user
 router.get(
   "/grouped",
-  authorize([ROLES.OWNER, ROLES.ADMIN]),
+  authorize([ROLES.OWNER]),
   getGroupedBookings
 );
 
 // Booking summary
 router.get(
   "/summary",
-  authorize([ROLES.OWNER, ROLES.ADMIN]),
+  authorize([ROLES.OWNER]),
   getBookingSummary
 );
 

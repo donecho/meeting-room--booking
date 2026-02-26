@@ -1,51 +1,85 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "./AuthContext";
-import { fetchUsers } from "../../api/user.api";
-import { api } from "../../api/axios";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/features/auth/auth.context";
 
 export default function LoginPage() {
-  const { user, login } = useContext(AuthContext);
-  const [users, setUsers] = useState([]);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchUsers().then(res => setUsers(res.data));
-  }, []);
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
 
-  const handleLogin = async (selectedUser) => {
-    const res = await api.get("/me", {
-      headers: { "x-user-id": selectedUser._id }
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
     });
+  };
 
-    login(res.data);
-    if (res.data.role === "ADMIN") {
-      navigate("/users");
-    } else {
-      navigate("/bookings");
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      await login(form.email, form.password);
+      navigate("/");
+    } catch (err) {
+      setError(
+        err.response?.data?.message || "Login failed. Try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (user) {
-    return (
-      <div className="p-6 text-white">
-        Logged in as: {user.name} ({user.role})
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 text-white">
-      <h2 className="text-xl mb-4">Select User</h2>
-      {users.map((u) => (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded shadow-md w-96"
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Login
+        </h2>
+
+        {error && (
+          <p className="text-red-500 text-sm mb-4">{error}</p>
+        )}
+
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={form.email}
+          onChange={handleChange}
+          required
+          className="w-full mb-4 px-3 py-2 border rounded"
+        />
+
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={form.password}
+          onChange={handleChange}
+          required
+          className="w-full mb-6 px-3 py-2 border rounded"
+        />
+
         <button
-          key={u._id}
-          className="block mb-2 px-4 py-2 bg-emerald-600"
-          onClick={() => handleLogin(u)}
+          type="submit"
+          disabled={loading}
+          className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
         >
-          {u.name} ({u.role})
+          {loading ? "Logging in..." : "Login"}
         </button>
-      ))}
+      </form>
     </div>
   );
 }

@@ -2,6 +2,7 @@ import * as repo from "../repositories/booking.repository.js";
 import { ROLES } from "../constants/roles.js";
 import AppError from "../utils/AppError.js";
 
+
 /* =========================
    CREATE BOOKING
 ========================= */
@@ -21,7 +22,7 @@ export const createBookingService = async (body, user) => {
   }
 
   // Overlap check
-  const overlapping = await repo.findOverlappingBooking(start, end);
+  const overlapping = await repo.findOverlappingBookingRepo(start, end);
 
   if (overlapping) {
     throw new AppError(
@@ -47,15 +48,17 @@ export const getBookingsService = async (user) => {
   // ADMIN / OWNER → see all bookings
   if (
     user.role === ROLES.ADMIN ||
-    user.role === ROLES.OWNER
+    user.role === ROLES.OWNER ||
+    user.role === ROLES.USER
+    
   ) {
     return repo.getAllBookingsRepo();
   }
 
   // USER → see only own bookings
-  if (user.role === ROLES.USER) {
-    return repo.getBookingsByUserRepo(user._id);
-  }
+  // if (user.role === ROLES.USER) {
+  //   return repo.getBookingsByUserRepo(user._id);
+  // }
 
   throw new AppError("Not authorized", 403);
 };
@@ -83,15 +86,14 @@ export const deleteBookingService = async (bookingId, user) => {
   return repo.deleteBookingRepo(bookingId);
 };
 
-
 /* =========================
    OWNER SUMMARY SERVICES
 ========================= */
 
 export const getGroupedBookingsService = async () => {
-  return repo.getBookingsGroupedByUser();
+  return repo.getBookingsGroupedByUserRepo();
 };
 
 export const getBookingSummaryService = async () => {
-  return repo.getBookingSummary();
+  return repo.getBookingSummaryRepo();
 };

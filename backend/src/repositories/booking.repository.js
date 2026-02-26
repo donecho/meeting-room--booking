@@ -14,8 +14,12 @@ export const createBookingRepo = (data) => {
 ========================= */
 
 export const getAllBookingsRepo = () => {
-  return Booking.find()
-    .populate("userId", "name email role")
+  const now = new Date();
+
+  return Booking.find({
+    endTime: { $gt: now }
+  })
+    .populate("userId", "name")
     .sort({ createdAt: -1 });
 };
 
@@ -25,8 +29,12 @@ export const getAllBookingsRepo = () => {
 ========================= */
 
 export const getBookingsByUserRepo = (userId) => {
-  return Booking.find({ userId })
-    .sort({ createdAt: -1 });
+  const now = new Date();
+
+  return Booking.find({
+    userId,
+    endTime: { $gt: now } 
+  }).sort({ createdAt: -1 });
 };
 
 
@@ -100,6 +108,24 @@ export const getBookingSummaryRepo = () => {
       $group: {
         _id: "$userId",
         totalBookings: { $sum: 1 }
+      }
+    },
+    {
+      $lookup: {
+        from: "users",        // MongoDB collection name
+        localField: "_id",   
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $project: {
+        _id: 1,
+        userName: "$user.name",  
+        totalBookings: 1
       }
     },
     {

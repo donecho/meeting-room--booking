@@ -20,5 +20,7 @@ const bookingSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+bookingSchema.index({ startTime: 1, endTime: 1 });
+bookingSchema.index({ userId: 1 });
 
 export default mongoose.model("Booking", bookingSchema);

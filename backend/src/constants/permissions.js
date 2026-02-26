@@ -21,6 +21,5 @@ export const PERMISSIONS = Object.freeze({
 
   VIEW_SUMMARY: [
     ROLES.OWNER,
-    ROLES.ADMIN,
   ],
 });
