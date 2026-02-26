@@ -10,32 +10,20 @@ const app = express();
 /* =========================
    SECURITY MIDDLEWARE
 ========================= */
-app.use(helmet());
-
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://meeting-room-booking-fawn.vercel.app",
-];
-
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
+    origin: "https://meeting-room-booking-fawn.vercel.app",
     credentials: true,
   })
 );
+app.options("*", cors());
 
 /* =========================
    BODY PARSER
 ========================= */
 
 app.use(express.json());
-
+app.use(helmet());
 /* =========================
    HEALTH CHECK
 ========================= */
