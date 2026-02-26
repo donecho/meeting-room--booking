@@ -1,5 +1,5 @@
-import express from "express";
 import cors from "cors";
+import express from "express";
 import helmet from "helmet";
 import routes from "./routes/index.js";
 import { errorHandler } from "./middleware/error.middleware.js";
@@ -10,15 +10,22 @@ const app = express();
 /* =========================
    SECURITY MIDDLEWARE
 ========================= */
-
 app.use(helmet());
+
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://meeting-room-booking-fawn.vercel.app",
+];
 
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.FRONTEND_URL
-        : ["http://localhost:5173", "http://127.0.0.1:5173"],
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
